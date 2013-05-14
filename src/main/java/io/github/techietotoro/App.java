@@ -11,9 +11,19 @@ import java.util.logging.Logger;
 import com.beust.jcommander.JCommander;
 
 import com.yetanotherx.reddit.RedditPlugin;
+import com.yetanotherx.reddit.api.data.CommentData;
+import com.yetanotherx.reddit.api.data.LinkData;
+import com.yetanotherx.reddit.api.modules.RedditComment;
 import com.yetanotherx.reddit.api.modules.RedditCore;
 import com.yetanotherx.reddit.api.modules.RedditLink;
-import com.yetanotherx.reddit.util.LinkType;
+import com.yetanotherx.reddit.api.modules.RedditSubreddit;
+import com.yetanotherx.reddit.http.request.Request;
+import com.yetanotherx.reddit.http.request.WebRequest;
+import com.yetanotherx.reddit.http.response.JSONResult;
+import com.yetanotherx.reddit.http.response.Response;
+import com.yetanotherx.reddit.redditbot.http.Transport;
+import com.yetanotherx.reddit.util.HTTPUtils;
+import com.yetanotherx.reddit.util.MapNode;
 
 /**
  * Hello world!
@@ -33,20 +43,61 @@ public class App extends RedditPlugin
 		RedditCore.newFromUserAndPass(this, params.username, params.password).doLogin();
         params = null;
         
-        RedditLink.doSubmit(this, "First post from bot!", "I'm trying to make a nice bot for some guys at futuristparty. Except I don't know python so I can't copy congressbot.", "techietotoro", LinkType.SELF);
+        // RedditLink.doSubmit(this, "First post from bot!", "I'm trying to make a nice bot for some guys at futuristparty. Except I don't know python so I can't copy congressbot.", "cswider", LinkType.SELF);
+        
+        RedditSubreddit csSub = RedditSubreddit.newFromName(this, "cswider");
+        
+        Transport transport = this.getTransport();
+        Request request = new WebRequest(this);
+        request.setURL(this.getRedditURL() + csSub.getSubredditData().getURL() + HTTPUtils.urlEncode("new.json"));
+        transport.setRequest(request);
+        
+        Response response = transport.sendURL();
+        JSONResult json = response.getJSONResult();
+        
+        for( MapNode node : json.getMapNodeList("data/children") ) {
+            LinkData data = LinkData.newInstance(node.getMapNode("data"));
+            RedditLink link = RedditLink.newFromLink(this, data);
+            if (link != null) {
+            	System.out.println("Link was not null! Attempting iteration.");
+            	CommentData[] comments = link.getComments();
+            	for (CommentData c : comments)
+            	{
+            		String text = c.getText();
+            		if (text.matches(".*llama.*"))
+            		{
+            			try {
+            				RedditComment newComment = RedditComment.newFromComment(this, c);
+            				newComment.doReply("Hey, this comment contains 'llama' somewhere! This means you are officially awesome!");
+            				System.out.println("Replied!");
+            			} catch (Exception e) {
+            				// something went wrong
+            				System.out.println("Error in replying to llama comment.");
+            			}
+            			Thread.sleep(2000);
+            		}
+            		System.out.println("Iterated.");
+            	}
+            }
+            else {
+            	System.out.println("Link was null! Ignoring.");
+            }
+        }
+        
+        
         
     }
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "JavaCongressWatchBot";
+		return "JavaCongressWatchBot v1.1.2 by /u/techietotoro";
 	}
 
 	@Override
 	public String getVersion() {
 		// TODO Auto-generated method stub
-		return "1.0";
+		return "1.1.2";
 	}
 	
 	@SuppressWarnings("unused")
