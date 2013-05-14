@@ -7,6 +7,14 @@
   <version>1.0-SNAPSHOT</version>
   <name>CongressJBot</name>
   <url>http://maven.apache.org</url>
+  <repositories>
+    <!--other repositories if any-->
+    <repository>
+        <id>RedditBot.local</id>
+        <name>RedditBot</name>
+        <url>file:${RedditBot.basedir}/repo</url>
+    </repository>
+  </repositories>
   <dependencies>
         <dependency>
             <groupId>junit</groupId>
