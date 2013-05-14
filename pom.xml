@@ -11,7 +11,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -31,7 +31,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -69,7 +69,7 @@
                             <Implementation-Vendor>Yetanotherx</Implementation-Vendor>
                             <Built-By>Yetanotherx</Built-By>
                             <Sealed>true</Sealed>
-                            <Main-Class>com.yetanotherx.bots.dbmirror.MainPlugin</Main-Class>
+                            <Main-Class>io.github.techietotoro.App</Main-Class>
                         </manifestEntries>
                         <manifestSections>
                             <manifestSection>
