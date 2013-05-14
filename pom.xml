@@ -10,9 +10,9 @@
   <repositories>
     <!--other repositories if any-->
     <repository>
-        <id>RedditBot.local</id>
-        <name>RedditBot</name>
-        <url>file:${RedditBot.basedir}/repo</url>
+        <id>project.local</id>
+        <name>project</name>
+        <url>file:${project.basedir}/repo</url>
     </repository>
   </repositories>
   <dependencies>
