@@ -5,25 +5,17 @@
 
 package io.github.techietotoro;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.beust.jcommander.JCommander;
 
 import com.yetanotherx.reddit.RedditPlugin;
-import com.yetanotherx.reddit.api.data.CommentData;
-import com.yetanotherx.reddit.api.data.LinkData;
-import com.yetanotherx.reddit.api.modules.RedditComment;
 import com.yetanotherx.reddit.api.modules.RedditCore;
 import com.yetanotherx.reddit.api.modules.RedditLink;
-import com.yetanotherx.reddit.api.modules.RedditSubreddit;
-import com.yetanotherx.reddit.http.request.Request;
-import com.yetanotherx.reddit.http.request.WebRequest;
-import com.yetanotherx.reddit.http.response.JSONResult;
-import com.yetanotherx.reddit.http.response.Response;
-import com.yetanotherx.reddit.redditbot.http.Transport;
-import com.yetanotherx.reddit.util.HTTPUtils;
-import com.yetanotherx.reddit.util.MapNode;
+import com.yetanotherx.reddit.exception.APIException;
+import com.yetanotherx.reddit.util.LinkType;
 
 /**
  * Hello world!
@@ -41,13 +33,50 @@ public class App extends RedditPlugin
     public void run() throws InterruptedException
     {
 		RedditCore.newFromUserAndPass(this, params.username, params.password).doLogin();
+		String subName = params.subreddit;
+		RSSFeedParser parser = new RSSFeedParser(params.feed);
         params = null;
+        
+        Feed feed = parser.readFeed();
+        ArrayList<FeedItem> items = feed.getItems();
+        
+        for (FeedItem item : items)
+        {
+        	if (item != null) {
+        		String title = "No Title";
+        		String link = "";
+        		String description = "No Description";
+        		
+        		if (item.getTitle() != null) title = item.getTitle();
+        		if (item.getLink() != null) link = item.getLink();
+        		if (item.getDescription() != null) description = item.getDescription();
+        		
+        		//put it all together in a nicey nice way
+        		StringBuilder builder = new StringBuilder();
+        		builder.append(description);
+        		builder.append("\n\n");
+        		builder.append("[Govtrack.us Summary](");
+        		builder.append(link);
+        		builder.append(")");
+        		String content = builder.toString();
+        		
+        		Thread.sleep(2000);
+        		try {
+        			RedditLink.doSubmit(this, title, content, subName, LinkType.SELF);
+        		} catch (APIException e) {
+        			System.out.println("An APIException occurred... :(");
+        			//System.out.println(sub.getSubredditData().getDisplayName());
+        			e.printStackTrace();
+        		}
+        		
+        		Thread.sleep(2000);
+        	
+        	}
+        }
         
         // RedditLink.doSubmit(this, "First post from bot!", "I'm trying to make a nice bot for some guys at futuristparty. Except I don't know python so I can't copy congressbot.", "cswider", LinkType.SELF);
         
-        RedditSubreddit csSub = RedditSubreddit.newFromName(this, "cswider");
-        
-        Transport transport = this.getTransport();
+        /*Transport transport = this.getTransport();
         Request request = new WebRequest(this);
         request.setURL(this.getRedditURL() + csSub.getSubredditData().getURL() + HTTPUtils.urlEncode("new.json"));
         transport.setRequest(request);
@@ -82,7 +111,8 @@ public class App extends RedditPlugin
             else {
             	System.out.println("Link was null! Ignoring.");
             }
-        }
+        }*/
+        
         
         
         
@@ -91,13 +121,13 @@ public class App extends RedditPlugin
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "JavaCongressWatchBot v1.1.2 by /u/techietotoro";
+		return "Java-CongressBot v1.2.1 by /u/techietotoro";
 	}
 
 	@Override
 	public String getVersion() {
 		// TODO Auto-generated method stub
-		return "1.1.2";
+		return "1.2.1";
 	}
 	
 	@SuppressWarnings("unused")

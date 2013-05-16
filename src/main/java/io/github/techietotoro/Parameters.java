@@ -10,4 +10,10 @@ public class Parameters {
     @Parameter(names = { "-pass", "-password" }, description = "Password")
     public String password;
     
+    @Parameter(names = { "-sub", "-subreddit" }, description = "Subreddit")
+    public String subreddit;
+    
+    @Parameter(names = { "-feed", "-url" }, description = "Feed URL")
+    public String feed;
+    
 }
