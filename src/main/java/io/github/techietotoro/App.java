@@ -79,8 +79,8 @@ public class App extends RedditPlugin
 				String content = builder.toString();
 
 				//check if the link as already been posted
-				//boolean alreadyPosted = checkDuplicate(item.getGuid());
-				boolean alreadyPosted = false;
+				boolean alreadyPosted = checkDuplicate(item.getGuid());
+				//boolean alreadyPosted = false;
 				if (!alreadyPosted) {
 					Thread.sleep(2000);
 					try {
@@ -147,27 +147,37 @@ public class App extends RedditPlugin
 	private boolean checkDuplicate(String guid) {
 		boolean result = false;
 
-		DB db = mongo.getDB(DATABASE);
-		DBCollection table = db.getCollection(COLLECTION);
-		BasicDBObject document = new BasicDBObject();
-		document.put(GUID_ID, guid);
+		try {
+			DB db = mongo.getDB(DATABASE);
+			DBCollection table = db.getCollection(COLLECTION);
+			BasicDBObject document = new BasicDBObject();
+			document.put(GUID_ID, guid);
 
-		if (table.count() > 0) {
-			DBCursor cursor = table.find(document);
-			if (cursor.hasNext()) {
-				result = true;
+			if (table.count() > 0) {
+				DBCursor cursor = table.find(document);
+				if (cursor.hasNext()) {
+					result = true;
+				}
 			}
+		} catch (Exception e) {
+			System.out.println("Unknown exception occurred while trying to check for duplicates.");
+			e.printStackTrace();
 		}
 
 		return result;
 	}
 
 	private void insertEntry(String guid) {
-		DB db = mongo.getDB(DATABASE);
-		DBCollection table = db.getCollection(COLLECTION);
-		BasicDBObject document = new BasicDBObject();
-		document.put(GUID_ID, guid);
-		table.insert(document);
+		try {
+			DB db = mongo.getDB(DATABASE);
+			DBCollection table = db.getCollection(COLLECTION);
+			BasicDBObject document = new BasicDBObject();
+			document.put(GUID_ID, guid);
+			table.insert(document);
+		} catch (Exception e) {
+			System.out.println("Unknown exception occurred while trying to insert new GUID into collection in database.");
+			e.printStackTrace();
+		}
 
 	}
 
