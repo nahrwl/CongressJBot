@@ -13,6 +13,8 @@ import javax.xml.stream.events.XMLEvent;
 
 // Originally written by Lars Vogel
 // http://www.vogella.com/articles/RSSFeed/article.html
+//
+// Edited by techietotoro aka Nathan Wallace
 public class RSSFeedParser {
   static final String TITLE = "title";
   static final String DESCRIPTION = "description";
@@ -68,7 +70,7 @@ public class RSSFeedParser {
             }
             event = eventReader.nextEvent();
           }
-          else if (localPart.equals(TITLE)) {
+          if (localPart.equals(TITLE)) {
             title = getCharacterData(event, eventReader);
           }
           else if (localPart.equals(DESCRIPTION)) {
