@@ -5,32 +5,33 @@
 
 package io.github.techietotoro;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.beust.jcommander.JCommander;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 import com.yetanotherx.reddit.RedditPlugin;
-import com.yetanotherx.reddit.api.data.LinkData;
 import com.yetanotherx.reddit.api.modules.RedditCore;
 import com.yetanotherx.reddit.api.modules.RedditLink;
-import com.yetanotherx.reddit.api.modules.RedditSubreddit;
 import com.yetanotherx.reddit.exception.APIException;
-import com.yetanotherx.reddit.http.request.Request;
-import com.yetanotherx.reddit.http.request.WebRequest;
-import com.yetanotherx.reddit.http.response.JSONResult;
-import com.yetanotherx.reddit.http.response.Response;
-import com.yetanotherx.reddit.redditbot.http.Transport;
 import com.yetanotherx.reddit.util.LinkType;
-import com.yetanotherx.reddit.util.MapNode;
 
-/**
- * Hello world!
- *
- */
 public class App extends RedditPlugin
 {
+	private final String DATABASE = "heroku_app15671465";
+	private final String COLLECTION = "guids";
+	private final String GUID_ID = "guid";
+
+	private MongoClient mongo;
+
 	private Parameters params;
 
 	public App(Parameters params) 
@@ -42,6 +43,15 @@ public class App extends RedditPlugin
 	{
 		RedditCore.newFromUserAndPass(this, params.username, params.password).doLogin();
 		String subName = params.subreddit;
+		String dbURI = params.database;
+
+		MongoClientURI mongoClientURI = new MongoClientURI(dbURI);
+		try {
+			this.mongo = new MongoClient(mongoClientURI);
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		}
+
 		RSSFeedParser parser = new RSSFeedParser(params.feed);
 		params = null;
 
@@ -69,12 +79,13 @@ public class App extends RedditPlugin
 				String content = builder.toString();
 
 				//check if the link as already been posted
-				boolean alreadyPosted = checkDuplicate(subName, title, content);
-
+				//boolean alreadyPosted = checkDuplicate(item.getGuid());
+				boolean alreadyPosted = false;
 				if (!alreadyPosted) {
 					Thread.sleep(2000);
 					try {
 						RedditLink.doSubmit(this, title, content, subName, LinkType.SELF);
+						this.insertEntry(item.getGuid());
 						System.out.println("Posted!");
 					} catch (APIException e) {
 						System.out.println("An APIException occurred... :(");
@@ -83,7 +94,7 @@ public class App extends RedditPlugin
 					}
 				}
 
-				Thread.sleep(2000);
+				Thread.sleep(2000); // no need to rush
 
 
 			}
@@ -133,45 +144,43 @@ public class App extends RedditPlugin
 
 	}
 
-	private boolean checkDuplicate(String subName, String title, String content) {
+	private boolean checkDuplicate(String guid) {
 		boolean result = false;
-		RedditSubreddit sub = RedditSubreddit.newFromName(this, subName);
 
-		Transport transport = this.getTransport();
-		Request request = new WebRequest(this);
-		request.setURL(this.getRedditURL() + sub.getSubredditData().getURL() + "new.json?limit=50");
-		transport.setRequest(request);
+		DB db = mongo.getDB(DATABASE);
+		DBCollection table = db.getCollection(COLLECTION);
+		BasicDBObject document = new BasicDBObject();
+		document.put(GUID_ID, guid);
 
-		Response response = transport.sendURL();
-		JSONResult json = response.getJSONResult();
-
-		for( MapNode node : json.getMapNodeList("data/children") ) {
-			LinkData data = LinkData.newInstance(node.getMapNode("data"));
-			RedditLink link = RedditLink.newFromLink(this, data);
-			if (link != null) {
-				//System.out.println("Link was not null! Attempting iteration.");
-				//check if the titles and content are the same
-				result = result || (title.toLowerCase().contains(link.getLinkData().getTitle().toLowerCase()));
-				result = result || (title.toLowerCase().contains(link.getLinkData().getSelfText().toLowerCase()));
-			}
-			else {
-				System.out.println("Link was null! Ignoring.");
+		if (table.count() > 0) {
+			DBCursor cursor = table.find(document);
+			if (cursor.hasNext()) {
+				result = true;
 			}
 		}
 
 		return result;
 	}
 
+	private void insertEntry(String guid) {
+		DB db = mongo.getDB(DATABASE);
+		DBCollection table = db.getCollection(COLLECTION);
+		BasicDBObject document = new BasicDBObject();
+		document.put(GUID_ID, guid);
+		table.insert(document);
+
+	}
+
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "Java-CongressBot v1.2.1 by /u/techietotoro";
+		return "Java-CongressBot v1.3.0 by /u/techietotoro";
 	}
 
 	@Override
 	public String getVersion() {
 		// TODO Auto-generated method stub
-		return "1.2.1";
+		return "1.3.0";
 	}
 
 	@SuppressWarnings("unused")

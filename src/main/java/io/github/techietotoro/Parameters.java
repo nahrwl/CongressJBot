@@ -16,4 +16,7 @@ public class Parameters {
     @Parameter(names = { "-feed", "-url" }, description = "Feed URL")
     public String feed;
     
+    @Parameter(names = { "-db", "-database" }, description = "Database URI")
+    public String database;
+    
 }
