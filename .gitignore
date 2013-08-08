@@ -8,6 +8,7 @@ doc
 
 *.pydevproject
 .project
+*.project
 .metadata
 bin/
 tmp/
@@ -170,3 +171,11 @@ pip-log.txt
 .classpath
 
 .settings/org.eclipse.jdt.core.prefs
+
+.project
+
+.project
+
+.project
+
+.project

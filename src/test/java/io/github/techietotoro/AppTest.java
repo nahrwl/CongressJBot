@@ -33,6 +33,8 @@ public class AppTest
      */
     public void testApp()
     {
-        assertTrue( true );
+    	XMLParser parser = new XMLParser("http://www.govtrack.us/api/v2/bill?&order_by=-introduced_date&current_status__in=introduced%7Creferred&format=xml&limit=10");
+        parser.parse();
+    	assertTrue( true );
     }
 }
