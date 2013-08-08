@@ -183,13 +183,11 @@ public class App extends RedditPlugin
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return "Java-CongressBot v1.3.0 by /u/techietotoro";
 	}
 
 	@Override
 	public String getVersion() {
-		// TODO Auto-generated method stub
 		return "1.3.0";
 	}
 
