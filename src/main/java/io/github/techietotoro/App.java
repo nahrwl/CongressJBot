@@ -52,40 +52,52 @@ public class App extends RedditPlugin
 			e1.printStackTrace();
 		}
 
-		RSSFeedParser parser = new RSSFeedParser(params.feed);
+		XMLParser parser = new XMLParser(params.feed);
 		params = null;
 
-		Feed feed = parser.readFeed();
-		ArrayList<FeedItem> items = feed.getItems();
+		ArrayList<Item> items = parser.parse();
 
-		for (FeedItem item : items)
+		for (Item item : items)
 		{
 			if (item != null) {
-				String title = "No Title";
-				String link = "";
-				String description = "No Description";
-
-				if (item.getTitle() != null) title = item.getTitle();
-				if (item.getLink() != null) link = item.getLink();
-				if (item.getDescription() != null) description = item.getDescription();
-
 				//put it all together in a nicey nice way
+				// first, build title
+				StringBuilder titleBuilder = new StringBuilder();
+				titleBuilder.append(item.getNumber());
+				titleBuilder.append(": ");
+				titleBuilder.append(item.getTitle());
+				String title = titleBuilder.toString();
+				
+				// then the self post content
 				StringBuilder builder = new StringBuilder();
-				builder.append(description);
+				builder.append("Status as of ");
+				builder.append(item.getDate());
+				builder.append(": ");
+				builder.append(item.getLastMajorAction());
 				builder.append("\n\n");
-				builder.append("[Govtrack.us Summary](");
-				builder.append(link);
+				builder.append("*" + item.getCurrentStatus() + "*");
+				builder.append("\n\n");
+				builder.append("[**Govtrack.us Summary**](");
+				builder.append(item.getLink());
 				builder.append(")");
+				builder.append("\n\n---------------------------------------\n\n");
+				builder.append("Sponsor: " + item.getSponsor() + "\n");
+				builder.append("\n* [Govtrack.us page](" + item.getSponsorLink() + ")");
+				if (!item.getSponsorTwitter().equals("null")) builder.append("\n* Twitter: [@" + item.getSponsorTwitter() + "](http://www.twitter.com/" + item.getSponsorTwitter() + ")");
+				builder.append("\n\n---------------------------------------\n\n");
+				builder.append("[Find out more about FuturistBot here.](http://techietotoro.github.io/CongressJBot/)");
+				
 				String content = builder.toString();
-
+				
+				// http://techietotoro.github.io/CongressJBot/
 				//check if the link as already been posted
-				boolean alreadyPosted = checkDuplicate(item.getGuid());
+				boolean alreadyPosted = checkDuplicate(item.getId());
 				//boolean alreadyPosted = false;
 				if (!alreadyPosted) {
 					Thread.sleep(2000);
 					try {
 						RedditLink.doSubmit(this, title, content, subName, LinkType.SELF);
-						this.insertEntry(item.getGuid());
+						this.insertEntry(item.getId());
 						System.out.println("Posted!");
 					} catch (APIException e) {
 						System.out.println("An APIException occurred... :(");
@@ -183,7 +195,7 @@ public class App extends RedditPlugin
 
 	@Override
 	public String getName() {
-		return "Java-CongressBot v1.3.0 by /u/techietotoro";
+		return "Java-CongressBot v1.4.0 by /u/techietotoro";
 	}
 
 	@Override

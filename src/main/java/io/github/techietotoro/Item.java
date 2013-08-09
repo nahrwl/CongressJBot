@@ -8,6 +8,10 @@ public class Item {
 	private String id;
 	private String link;
 	private String currentStatus;
+	private String lastMajorAction;
+	private String sponsor;
+	private String sponsorTwitter;
+	private String sponsorLink;
 	public String getTitle() {
 		return title;
 	}
@@ -49,5 +53,29 @@ public class Item {
 	}
 	public void setCurrentStatus(String currentStatus) {
 		this.currentStatus = currentStatus;
+	}
+	public String getLastMajorAction() {
+		return lastMajorAction;
+	}
+	public void setLastMajorAction(String lastMajorAction) {
+		this.lastMajorAction = lastMajorAction;
+	}
+	public String getSponsor() {
+		return sponsor;
+	}
+	public void setSponsor(String sponsor) {
+		this.sponsor = sponsor;
+	}
+	public String getSponsorTwitter() {
+		return sponsorTwitter;
+	}
+	public void setSponsorTwitter(String sponsorTwitter) {
+		this.sponsorTwitter = sponsorTwitter;
+	}
+	public String getSponsorLink() {
+		return sponsorLink;
+	}
+	public void setSponsorLink(String sponsorLink) {
+		this.sponsorLink = sponsorLink;
 	}
 }
